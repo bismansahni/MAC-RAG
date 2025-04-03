@@ -1,0 +1,66 @@
+# Xcode
+*.xcworkspace
+*.xcodeproj
+*.xcuserdata
+*.xcuserstate
+*.xccheckout
+*.moved-aside
+DerivedData/
+build/
+.idea/
+*.hmap
+*.ipa
+*.dSYM
+*.DS_Store
+
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# CoreML / Model Artifacts
+*.mlmodelc/
+*.onnx
+__MACOSX/
+
+# Tokenizer / HF cache
+.cache/
+tokenizer.json
+vocab.txt
+merges.txt
+tokenizer_config.json
+special_tokens_map.json
+
+# Logs & Temp
+*.log
+*.tmp
+*.swp
+
+# Env and credentials
+.env
+secrets.json
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Vim / Emacs
+*~
+*.swp
+.*.swp
+.swo
+.swn
+
+# Python interop
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.ipynb_checkpoints/
+
+# Optional: Index / storage output
+index/
+embeddings/
+
+model-place/
