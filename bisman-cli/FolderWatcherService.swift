@@ -203,7 +203,7 @@ class FolderWatcherService {
                 Task {
                     do {
                         let content = try String(contentsOfFile: file, encoding: .utf8)
-                        await MiniLMEmbedder.embed(text: content)
+                        await MiniLMEmbedder.embed(text: content,filePath: file)
                     } catch {
                         print("❌ Failed to read file: \(file)\nError: \(error)")
                     }
