@@ -201,9 +201,13 @@ class FolderWatcherService {
             for file in added {
                 print("➕ Added: \(file)")
                 Task {
-                    await MiniLMEmbedder.embedFile(at: file)
-                }
-            }
+                    do {
+                        let content = try String(contentsOfFile: file, encoding: .utf8)
+                        await MiniLMEmbedder.embed(text: content)
+                    } catch {
+                        print("❌ Failed to read file: \(file)\nError: \(error)")
+                    }
+                }}
 
             // Handle removed files (trigger removal from index if needed)
             for file in removed {
