@@ -12,82 +12,6 @@
 
 
 
-//
-//import Foundation
-//import CoreML
-//
-//class MiniLMEmbedder {
-//    private static var sharedModel: MiniLMEmbedder?
-//
-//    private let model: MLModel
-//
-//    private init(model: MLModel) {
-//        self.model = model
-//    }
-//
-//    static func initialize(with modelPath: String) throws {
-//        let modelURL = URL(fileURLWithPath: modelPath)
-//        let compiledURL = try MLModel.compileModel(at: modelURL)
-//        let mlModel = try MLModel(contentsOf: compiledURL)
-//        sharedModel = MiniLMEmbedder(model: mlModel)
-//    }
-//
-//    static func embedFile(at filePath: String) async {
-//        guard let embedder = sharedModel else {
-//            print("❌ MiniLMEmbedder not initialized")
-//            return
-//        }
-//
-//        do {
-//            let content = try String(contentsOfFile: filePath, encoding: .utf8)
-//            let embedding = try embedder.embed(text: content)
-//            print("🧠 Embedded \(filePath) → \(embedding.prefix(5))...")
-//            // Save embedding to storage/index if needed
-//        } catch {
-//            print("❌ Failed to embed \(filePath): \(error)")
-//        }
-//    }
-//
-//    func embed(text: String) throws -> [Float] {
-//        let tokens = tokenize(text: text)
-//        guard !tokens.isEmpty else { return [] }
-//
-//        let inputIDs = try MLMultiArray(Int32Array: tokens)
-//        let attentionMask = try MLMultiArray(Int32Array: Array(repeating: 1, count: tokens.count))
-//
-//        let inputs = try MLDictionaryFeatureProvider(dictionary: [
-//            "input_ids": inputIDs,
-//            "attention_mask": attentionMask
-//        ])
-//
-//        let prediction = try model.prediction(from: inputs)
-//        guard let output = prediction.featureValue(for: "last_hidden_state")?.multiArrayValue else {
-//            throw NSError(domain: "MiniLMEmbedder", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing embedding output"])
-//        }
-//
-//        return convertToFloatArray(output)
-//    }
-//
-//    private func tokenize(text: String) -> [Int32] {
-//        // Dummy tokenizer — replace with real tokenizer if needed
-//        return [101, 2023, 2003, 1037, 2742, 102]
-//    }
-//
-//    private func convertToFloatArray(_ array: MLMultiArray) -> [Float] {
-//        return (0..<array.count).map { Float(truncating: array[$0]) }
-//    }
-//}
-//
-//extension MLMultiArray {
-//    convenience init(Int32Array values: [Int32]) throws {
-//        try self.init(shape: [1, NSNumber(value: values.count)], dataType: .float32)
-//        for (i, v) in values.enumerated() {
-//            self[i] = NSNumber(value: v)
-//        }
-//    }
-//}
-
-
 
 import Foundation
 import CoreML
@@ -98,7 +22,8 @@ class MiniLMEmbedder {
     private let model: MLModel
     private let chunkSize: Int
     private let chunkOverlap: Int
-    
+
+
     private init(model: MLModel, chunkSize: Int = 512, chunkOverlap: Int = 50) {
         self.model = model
         self.chunkSize = chunkSize
@@ -208,3 +133,9 @@ extension MLMultiArray {
         }
     }
 }
+
+
+
+
+
+

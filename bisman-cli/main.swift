@@ -19,7 +19,7 @@ import Foundation
 
 // Initialize the MiniLM model
 do {
-    try MiniLMEmbedder.initialize(with: "/Users/bismansahni/Documents/bisman-cli/model-place/minilm.mlpackage", tokenizerID: "sentence-transformers/all-MiniLM-L6-v2")
+    try await MiniLMEmbedder.initialize(with: "/Users/bismansahni/Documents/bisman-cli/model-place/minilm.mlpackage")
     print("✅ MiniLM model initialized successfully")
 } catch {
     print("❌ Failed to initialize MiniLM model: \(error)")
