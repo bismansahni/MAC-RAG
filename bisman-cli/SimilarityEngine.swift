@@ -5,73 +5,134 @@
 //  Created by Bisman Sahni on 4/2/25.
 //
 
+//
+
+
+
+
 
 import Foundation
-import Accelerate
+import SwiftFaiss
 
 struct SimilarityEngine {
-    static func cosineSimilarity(_ a: [Float], _ b: [Float]) -> Float {
-        precondition(a.count == b.count, "Vectors must be the same length")
-
-        var dotProduct: Float = 0
-        var normA: Float = 0
-        var normB: Float = 0
-
-        for i in 0..<a.count {
-            dotProduct += a[i] * b[i]
-            normA += a[i] * a[i]
-            normB += b[i] * b[i]
+    static func findTopKMatches(
+        for queryEmbedding: [Float],
+        in jsonlPath: String,
+        topK: Int = 3
+    ) -> [(filename: String, score: Float)] {
+        guard let lines = try? String(contentsOfFile: jsonlPath).split(separator: "\n") else {
+            print("❌ Could not read \(jsonlPath)")
+            return []
         }
 
-        return dotProduct / (sqrt(normA) * sqrt(normB) + 1e-9)
-    }
+        var embeddings: [[Float]] = []
+        var filenames: [String] = []
 
-    static func loadEmbeddings(from folderPath: String) -> [(path: String, vector: [Float])]? {
-        let fileManager = FileManager.default
-        guard let files = try? fileManager.contentsOfDirectory(atPath: folderPath) else { return nil }
+        for line in lines {
+            guard let data = line.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let embeddingArray = json["embedding"] as? [Double],
+//                  let filename = json["filename"] as? String else {
+                  let filename = json["file"] as? String else{
 
-        var results: [(String, [Float])] = []
+                continue
+            }
 
-        for file in files where file.hasSuffix(".txt") {
-            let fullPath = folderPath + "/" + file
-            if let content = try? String(contentsOfFile: fullPath),
-               let floats = parseEmbedding(from: content) {
-                results.append((fullPath, floats))
+            let floatEmbedding = embeddingArray.map { Float($0) }
+            if floatEmbedding.count == queryEmbedding.count {
+                embeddings.append(floatEmbedding)
+                filenames.append(filename)
+            } else {
+                print("⚠️ Skipping \(filename) due to dimension mismatch")
             }
         }
 
-        return results
-    }
-
-    private static func parseEmbedding(from text: String) -> [Float]? {
-        let lines = text.split(separator: "\n")
-        let allValues = lines.flatMap { $0.split(separator: "\t").compactMap { Float($0) } }
-        return allValues.isEmpty ? nil : allValues
-    }
-    
-//    private static func parseEmbedding(from text: String) -> [Float]? {
-//        let firstLine = text.split(separator: "\n").first ?? ""
-//        let values = firstLine.split(separator: "\t").compactMap { Float($0) }
-//        return values.isEmpty ? nil : values
-//    }
-//
-
-    static func findTopKMatches(for queryEmbedding: [Float], in folderPath: String, topK: Int = 3) -> [(path: String, score: Float)] {
-        guard let storedEmbeddings = loadEmbeddings(from: folderPath) else { return [] }
-            
-        
-       
-
-        let scored = storedEmbeddings.map { (path, vector) in
-            print("📏 Query size: \(queryEmbedding.count), Stored size: \(vector.count)")
-            let sim = cosineSimilarity(queryEmbedding, vector)
-            return (path, sim)
+        guard !embeddings.isEmpty else {
+            print("❌ No valid embeddings to compare")
+            return []
         }
 
-//        return scored.sorted(by: { $0.score > $1.score }).prefix(topK).map { $0 }
-        
-        return Array(scored.sorted(by: { $0.1 > $1.1 }).prefix(topK))
+        do {
+            let d = queryEmbedding.count
+            let index = try FlatIndex(d: d, metricType: .l2)
+            try index.add(embeddings)
+            let result = try index.search([queryEmbedding], k: topK)
 
+            return zip(result.labels[0], result.distances[0]).compactMap { (label, distance) in
+                guard label >= 0 && label < filenames.count else { return nil }
+                return (filenames[Int(label)], distance)
+            }
 
+        } catch {
+            print("❌ Faiss error: \(error)")
+            return []
+        }
     }
 }
+
+
+
+//
+//
+//
+//import Foundation
+//import SwiftFaiss
+//
+//struct SimilarityEngine {
+//    static func findTopKMatches(
+//        for queryEmbedding: [Float],
+//        in jsonlPath: String,
+//        topK: Int = 3
+//    ) -> [(filename: String, score: Float)] {
+//        guard let lines = try? String(contentsOfFile: jsonlPath).split(separator: "\n") else {
+//            print("❌ Could not read \(jsonlPath)")
+//            return []
+//        }
+//
+//        var embeddings: [[Float]] = []
+//        var filenames: [String] = []
+//
+//        for line in lines {
+//            guard let data = line.data(using: .utf8),
+//                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+//                  let embeddingArray = json["embedding"] as? [Double],
+//                  let filename = json["file"] as? String else {
+//                continue
+//            }
+//
+//            let floatEmbedding = embeddingArray.map { Float($0) }
+//            if floatEmbedding.count == queryEmbedding.count {
+//                embeddings.append(floatEmbedding)
+//                filenames.append(filename)
+//            } else {
+//                print("⚠️ Skipping \(filename) due to dimension mismatch")
+//            }
+//        }
+//
+//        guard !embeddings.isEmpty else {
+//            print("❌ No valid embeddings to compare")
+//            return []
+//        }
+//
+//        do {
+//            let d = queryEmbedding.count
+//            let index = try FlatIndex(d: d, metricType: .l2)
+//            try index.add(embeddings)
+//            let result = try index.search([queryEmbedding], k: topK * 2) // extra to handle duplicates
+//
+//            let rawMatches = zip(result.labels[0], result.distances[0]).compactMap { (label, distance) in
+//                guard label >= 0 && label < filenames.count else { return nil }
+//                return (filenames[Int(label)], distance)
+//            }
+//
+//            var seen = Set<String>()
+//            let uniqueMatches = rawMatches.filter { seen.insert($0.0).inserted }
+//
+//            return Array(uniqueMatches.prefix(topK))
+//
+//        } catch {
+//            print("❌ Faiss error: \(error)")
+//            return []
+//        }
+//    }
+//}
