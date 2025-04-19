@@ -7,34 +7,6 @@
 
 
 
-//
-//
-//
-//import Foundation
-//
-//
-//struct MacMuseCLI {
-//    static func main() async {
-//        print("""
-//        ┌────────────────────────────────────────────┐
-//        │                                            │
-//        │   👋 Welcome to MacMuse                    │
-//        │   Your Private On-Device RAG System 🧠     │
-//        │                                            │
-//        └────────────────────────────────────────────┘
-//        """)
-//
-//        print("📂 Please enter the path to the folder you'd like to track:")
-//        if let path = readLine(), !path.isEmpty {
-//            print("👀 Watching folder: \(path)")
-//            // Call folder watching setup here
-//            await FolderWatcherService.startWatching(at: path)
-//        } else {
-//            print("⚠️ No path provided. Exiting.")
-//        }
-//    }
-//}
-
 
 
 import Foundation

@@ -3,25 +3,7 @@
 //  bisman-cli
 //
 //  Created by Bisman Sahni on 4/2/25.
-//
 
-//
-//
-//import Foundation
-//import CoreML
-//import Path
-//import Models
-//
-//class ModelLoader {
-//    static let models = Path.applicationSupport / "hf-compiled-transformers"
-//    static let lastCompiledModel = models / "last-model.mlmodelc"
-//
-//    static func load(localPath: String) async throws -> LanguageModel {
-//        let compiledModel = try await MLModel.compileModel(at: URL(fileURLWithPath: localPath))
-//        let mlModel = try MLModel(contentsOf: compiledModel)
-//        return try LanguageModel(underlyingModel: mlModel)
-//    }
-//}
 
 import CoreML
 import Path
