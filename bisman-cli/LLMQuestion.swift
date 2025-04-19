@@ -83,7 +83,7 @@ struct LLMQuestion {
         print("📨 Prompt ready. Running through Mistral...")
 
         let config = GenerationConfig(
-            maxNewTokens: 200,
+            maxNewTokens: 400,
             temperature: 0.7,
             topK: 50,
             topP: 0.95
