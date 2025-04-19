@@ -251,17 +251,43 @@ struct LLMQuestion {
         let matches = SimilarityEngine.findTopKMatches(for: queryEmbedding)
 
         // 3. Get associated chunk texts from DB
-        let filenames = matches.map { $0.filename }
-        let textMap = EmbeddingDatabase.shared.getChunkTexts(byFilenames: filenames)
-
-        // 4. Build context from those chunks
+//        let filenames = matches.map { $0.filename }
+//        let uniqueSources = Set(filenames.map { URL(fileURLWithPath: $0).lastPathComponent })
+//        print("🧾 Answer was built using context from files: \(uniqueSources.joined(separator: ", "))")
+//
+//        let textMap = EmbeddingDatabase.shared.getChunkTexts(byFilenames: filenames)
+//
+//        // 4. Build context from those chunks
+//        var context = ""
+//        for filename in filenames {
+//            let chunks = textMap[filename] ?? []
+//            for chunk in chunks {
+//                context += "\n--- From: \(filename)\n\(chunk)\n"
+//            }
+//        }
+        
+        // 3. Build context only from matched chunks
         var context = ""
-        for filename in filenames {
-            let chunks = textMap[filename] ?? []
-            for chunk in chunks {
-                context += "\n--- From: \(filename)\n\(chunk)\n"
+        var seenChunks = Set<String>()
+        var sourceFiles = Set<String>()
+
+        for (filename, _) in matches {
+            let shortName = URL(fileURLWithPath: filename).lastPathComponent
+            sourceFiles.insert(shortName)
+
+            let allChunks = EmbeddingDatabase.shared.getChunkTexts(byFilenames: [filename])
+            if let chunks = allChunks[filename] {
+                for chunk in chunks {
+                    // Optional: avoid duplicate chunks
+                    if seenChunks.insert(chunk).inserted {
+                        context += "\n--- From: \(shortName)\n\(chunk)\n"
+                    }
+                }
             }
         }
+
+        print("🧾 Answer was built using context from files: \(sourceFiles.joined(separator: ", "))")
+
 
         let prompt = """
         You are a helpful assistant. Use the context below to answer the question.

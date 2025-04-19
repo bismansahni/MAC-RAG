@@ -287,7 +287,10 @@ struct MiniLMEmbedder {
 
                 if let embedding = prediction.featureValue(for: "pooler_output")?.multiArrayValue {
                     let floatArray = (0..<embedding.count).map { Float(truncating: embedding[$0]) }
-                    let chunkText = chunk.joined(separator: " ")
+               let chunkText = chunk.joined(separator: " ")
+                    
+//                    let chunkText = tokenizer.decode(tokens: chunk)
+
                     EmbeddingDatabase.shared.insertChunk(file: filePath, chunkIndex: index, text: chunkText, embedding: floatArray)
                     print("💾 Inserted chunk \(index) for \(filePath)")
                 }
