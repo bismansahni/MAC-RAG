@@ -34,20 +34,7 @@ struct LLMQuestion {
         var seenChunks = Set<String>()
         var sourceFiles = Set<String>()
 
-//        for (filename, _) in matches {
-//            let shortName = URL(fileURLWithPath: filename).lastPathComponent
-//            sourceFiles.insert(shortName)
-//
-//            let allChunks = EmbeddingDatabase.shared.getChunkTexts(byFilenames: [filename])
-//            if let chunks = allChunks[filename] {
-//                for chunk in chunks {
-//                    // Optional: avoid duplicate chunks
-//                    if seenChunks.insert(chunk).inserted {
-//                        context += "\n--- From: \(shortName)\n\(chunk)\n"
-//                    }
-//                }
-//            }
-//        }
+
         
         
         for (chunk, _) in matches {
